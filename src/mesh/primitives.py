@@ -4,9 +4,8 @@ from collections import namedtuple
 from src.Utilities.field import Field
 from src.Utilities.field_operations import *
 
-face = namedtuple('face', 'center vector')
+
 cell = namedtuple('cell', 'center volume')
-pair = namedtuple('pair', 'face_id cell_id')
 boundary_faces = namedtuple('boundaries', 'center vector owner patch')
 internal_faces = namedtuple('internal', 'center vector owner neighbour')
 
@@ -50,7 +49,7 @@ class Topology(object):
 
 
 if __name__ == '__main__':
-    path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt' #'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\mesh_intro_example.mphtxt'
+    path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
     from src.conversion.convert import connectivity_to_foam
 
