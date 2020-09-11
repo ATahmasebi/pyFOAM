@@ -6,10 +6,6 @@ from collections import namedtuple
 
 patch = namedtuple('patch', 'id type values')
 
-patchs = []
-for patch in patchs:
-    id = patch.id
-
 
 def process_boundaries(mesh):
     cells = mesh.topology.cells
