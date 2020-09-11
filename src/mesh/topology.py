@@ -2,11 +2,12 @@ import numpy as np
 
 from src.Utilities.field import Field
 from src.Utilities.field_operations import *
-from src.mesh.primitives import boundary_faces, internal_faces, cell
+from src.mesh.primitives import boundary_faces, internal_faces, cell, info
 
 
 class Topology(object):
     def __init__(self, elements):
+        self.info = info(elements['points'], elements['unit'])
         nodes = Field(elements['points'], elements['unit'])
         faces = elements['faces']
         t = np.array([[f[0], f[i], f[i + 1], x] for x, f in enumerate(faces) for i in range(1, len(f) - 1)])
