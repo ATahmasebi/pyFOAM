@@ -4,3 +4,4 @@ src/mesh/__pycache__/primitives.cpython-37.pyc
 src/Utilities/__pycache__/field_operations.cpython-37.pyc
 src/Utilities/__pycache__/field.cpython-37.pyc
 src/Utilities/__pycache__/Units.cpython-37.pyc
+.vscode/settings.json

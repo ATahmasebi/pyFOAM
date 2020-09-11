@@ -4,6 +4,23 @@ from src.Utilities.field_operations import *
 from collections import namedtuple
 
 
+patch = namedtuple('patch', 'id type values')
+
+patchs = []
+for patch in patchs:
+    id = patch.id
+
+
+def process_boundaries(mesh):
+    cells = mesh.topology.cells
+    faces = mesh.topology.boundary
+    dbf = cells.center[faces.owner] - faces.center
+    Sb = faces.vector
+    # if necessary add correction here
+
+
+
+
 def face_decompose(topology, method='or'):
     cells = topology.cells
     faces = topology.internal
@@ -20,6 +37,7 @@ def face_decompose(topology, method='or'):
     Tf = Sf - Ef
     return Tf, Ef
 
+
 if __name__ == '__main__':
     path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
@@ -32,6 +50,3 @@ if __name__ == '__main__':
     top = Topology(foam)
     tf, ef = face_decompose(top)
     print(ef)
-
-
-

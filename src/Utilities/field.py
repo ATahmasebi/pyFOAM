@@ -43,8 +43,11 @@ class Field(np.ndarray):
     def __str__(self):
         return super().__str__() + f' [{str(self.unit)}]'
 
+    def convert(self, unit):
+        cr = self.unit.conversion_ratio(unit)
+        return Field(cr * self, unit)
+
 
 if __name__ == '__main__':
     f = Field([[1.2, 3, 4, 5], [3, 5, 6, 5]], 'm')
-    e = 0.5 * (np.roll(f, 1, axis=1) * np.roll(f, 2, axis=1) - np.roll(f, 2, axis=1) * np.roll(f, 2, axis=1))
-    print(e)
+    print(f)
