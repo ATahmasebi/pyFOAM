@@ -7,7 +7,7 @@ from src.mesh.primitives import boundary_faces, internal_faces, cell, info
 
 class Topology(object):
     def __init__(self, elements):
-        self.info = info(elements['points'], elements['unit'])
+        self.info = info(elements['ncells'], elements['unit'])
         nodes = Field(elements['points'], elements['unit'])
         faces = elements['faces']
         t = np.array([[f[0], f[i], f[i + 1], x] for x, f in enumerate(faces) for i in range(1, len(f) - 1)])
