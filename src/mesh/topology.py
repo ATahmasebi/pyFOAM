@@ -26,9 +26,8 @@ class Topology(object):
         f_index, owner, patch = np.array(elements['boundaries'], dtype=int).transpose()
         self.boundary = boundary_faces(fc[f_index], fv[f_index], owner, patch)
 
-        cnum = elements['ncells']
         pvi = dot(self.internal.center, self.internal.vector) / 3
-        cv = Field(np.zeros((cnum, 1)), pvi.unit)
+        cv = Field(np.zeros((self.info.cells, 1)), pvi.unit)
         np.add.at(cv, self.internal.owner, pvi)
         np.subtract.at(cv, self.internal.neighbour, pvi)
         pvb = dot(self.boundary.center, self.boundary.vector) / 3
@@ -36,7 +35,7 @@ class Topology(object):
 
         pci = 0.75 * self.internal.center * pvi
         pcb = 0.75 * self.boundary.center * pvb
-        cc = Field(np.zeros((cnum, 3)), pci.unit)
+        cc = Field(np.zeros((self.info.cells, 3)), pci.unit)
         np.add.at(cc, self.internal.owner, pci)
         np.subtract.at(cc, self.internal.neighbour, pci)
         np.add.at(cc, self.boundary.owner, pcb)
