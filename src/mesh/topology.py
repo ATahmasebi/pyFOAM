@@ -20,25 +20,32 @@ class Topology(object):
         wt = norm(ta) * tc
         fc = Field(np.zeros((len(faces), 3)), wt.unit)
         np.add.at(fc, t[:, 3], wt)
-        fc = fc/norm(fv)
+        fc = fc / norm(fv)
         f_index, owner, neighbour = np.array(elements['internal'], dtype=int).transpose()
         self.internal = internal_faces(fc[f_index], fv[f_index], owner, neighbour)
         f_index, owner, patch = np.array(elements['boundaries'], dtype=int).transpose()
-        self.boundary = boundary_faces(fc[f_index], fv[f_index], owner, patch)
+        boundaries = boundary_faces(fc[f_index], fv[f_index], owner, patch)
+        self.boundary = []
+        for p in range(np.max(boundaries.patch) + 1):
+            index = boundaries.patch == p
+            ow = boundaries.owner[index]
+            fc = boundaries.center[index]
+            fv = boundaries.vector[index]
+            self.boundary.append(boundary_faces(fc, fv, ow, p))
 
         pvi = dot(self.internal.center, self.internal.vector) / 3
         cv = Field(np.zeros((self.info.cells, 1)), pvi.unit)
         np.add.at(cv, self.internal.owner, pvi)
         np.subtract.at(cv, self.internal.neighbour, pvi)
-        pvb = dot(self.boundary.center, self.boundary.vector) / 3
-        np.add.at(cv, self.boundary.owner, pvb)
+        pvb = dot(boundaries.center, boundaries.vector) / 3
+        np.add.at(cv, boundaries.owner, pvb)
 
         pci = 0.75 * self.internal.center * pvi
-        pcb = 0.75 * self.boundary.center * pvb
+        pcb = 0.75 * boundaries.center * pvb
         cc = Field(np.zeros((self.info.cells, 3)), pci.unit)
         np.add.at(cc, self.internal.owner, pci)
         np.subtract.at(cc, self.internal.neighbour, pci)
-        np.add.at(cc, self.boundary.owner, pcb)
+        np.add.at(cc, boundaries.owner, pcb)
         cc = cc / cv
         self.cells = cell(cc, cv)
 
@@ -55,6 +62,4 @@ if __name__ == '__main__':
     top = Topology(foam)
     print(top.boundary)
     print(top.internal)
-    print(top.cells.center)
-    print(top.cells.volume)
-
+    print(top.cells)
