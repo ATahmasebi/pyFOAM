@@ -8,14 +8,9 @@ from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import splu
 from time import perf_counter
 
+f = Field([[0.5, 1., 2.],
+       [1.5, 2., 3.],
+       [2.5, 3., 4.]], 'm')
+l = Field([1, 2, 3], 'm').reshape((-1, 1))
 
-a = np.random.randint(1000000000)
-start = perf_counter()
-
-
-b = np.max(a)
-end = perf_counter()
-
-print(end - start)
-print(b)
-
+print(f * l)

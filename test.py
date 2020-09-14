@@ -7,14 +7,6 @@ from collections import namedtuple
 patch = namedtuple('patch', 'id type values')
 
 
-def process_boundaries(mesh):
-    cells = mesh.topology.cells
-    faces = mesh.topology.boundary
-    dbf = cells.center[faces.owner] - faces.center
-    Sb = faces.vector
-    # if necessary add correction here
-
-
 
 
 def face_decompose(topology, method='or'):
