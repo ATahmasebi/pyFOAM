@@ -2,7 +2,7 @@ import numpy as np
 
 from src.Utilities.field import Field
 from src.Utilities.field_operations import *
-from src.mesh.primitives import boundary_faces, internal_faces, cell, info
+from src.mesh.primitives import boundary_faces, internal_faces, cell, info, on_demand_prop
 
 
 class Topology(object):
@@ -48,6 +48,23 @@ class Topology(object):
         np.add.at(cc, boundaries.owner, pcb)
         cc = cc / cv
         self.cells = cell(cc, cv)
+
+    @on_demand_prop
+    def gf(self):
+        faces = self.internal.vector
+        return dot(self.dCf, faces) / dot(self.dCF, faces)
+
+    @on_demand_prop
+    def dCF(self):
+        cells = self.cells
+        faces = self.internal
+        return cells.center[faces.owner] - cells.center[faces.neighbour]
+
+    @on_demand_prop
+    def dCf(self):
+        cells = self.cells
+        faces = self.internal
+        return cells.center[faces.owner] - faces.center
 
 
 if __name__ == '__main__':

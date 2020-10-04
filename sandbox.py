@@ -8,9 +8,11 @@ from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import splu
 from time import perf_counter
 
-f = Field([[0.5, 1., 2.],
-       [1.5, 2., 3.],
-       [2.5, 3., 4.]], 'm')
-l = Field([1, 2, 3], 'm').reshape((-1, 1))
 
-print(f * l)
+class Test:
+    pass
+
+
+f = Field([[1, 2, 1], [2, 4, 3]], 'm')
+f[:, :] = Field([1, 3, 5], 'mm')
+print(f)
