@@ -49,5 +49,8 @@ class Field(np.ndarray):
 
 
 if __name__ == '__main__':
-    f = Field([[1.2, 3, 4, 5], [3, 5, 6, 5]], 'm')
-    print(f)
+    f = Field([1, 0, 3], 'cm')
+    d = Field(np.random.rand(9).reshape((3,3)),'m')
+    print(d)
+    d[[1,2]] = f
+    print(d)
