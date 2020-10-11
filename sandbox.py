@@ -9,10 +9,8 @@ from scipy.sparse.linalg import splu
 from time import perf_counter
 
 
-f1 = Field([[1,2,3], [4,5,6]], 'm/s').reshape(((-1,1)))
-f2 = Field([5,10,1],'m')
+f1 = Field([[1,2,3], [4,5,6], [7,8,9]], 'm**2')
+print(f1.shape)
+f2 = Field([5,10,1],'m').reshape((3,1))
+print(f1*f2)
 
-
-f3 = (f1*f2).reshape((2,3,3))
-f4 = Field([[1,2,3], [4,5,6]], 'm/s')
-print(dot(f4,f3))

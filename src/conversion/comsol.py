@@ -51,8 +51,8 @@ def build_3d_mesh(elements, dim1=1, dim2=1):
         d = dim2 / 2
         points = elements['points']
         npoints = len(points)
-        elements_2d['points'] = np.concatenate((np.insert(points, 1, d, axis=1),
-                                                np.insert(points, 1, -d, axis=1)), axis=0)
+        elements_2d['points'] = np.concatenate((np.insert(points, 1, -d, axis=1),
+                                                np.insert(points, 1, d, axis=1)), axis=0)
         edges = elements[' edg ']
         elements_2d[' quad '] = np.concatenate((edges, edges + npoints), axis=1)
         elements_2d[' quad gei'] = elements[' edg gei']
@@ -66,7 +66,7 @@ def build_3d_mesh(elements, dim1=1, dim2=1):
     elements_3d = {'ndim': 3}
     points = elements['points']
     npoints = len(points)
-    elements_3d['points'] = np.concatenate((np.insert(points, 2, d, axis=1), np.insert(points, 2, -d, axis=1)), axis=0)
+    elements_3d['points'] = np.concatenate((np.insert(points, 2, -d, axis=1), np.insert(points, 2, d, axis=1)), axis=0)
     edges = elements[' edg ']
     elements_3d[' quad '] = np.concatenate((edges, edges + npoints), axis=1)
     elements_3d[' quad gei'] = elements[' edg gei']
@@ -94,7 +94,7 @@ def build_element_connectivity(elements):
     element_com = {
         # ' quad ': [[0, 1], [1, 3], [3, 2], [2, 0]],
         ' tet ': [[0, 1, 3], [1, 2, 3], [2, 0, 3], [0, 2, 1]],
-        ' pyr ': [[0, 2, 3, 1], [0, 4, 2], [0, 1, 4], [1, 3, 4]],
+        ' pyr ': [[0, 2, 3, 1], [3, 2, 4], [0, 4, 2], [0, 1, 4], [1, 3, 4]],
         ' prism ': [[0, 3, 5, 2], [0, 1, 4, 3], [1, 2, 5, 4], [3, 4, 5], [0, 2, 1]],
         ' hex ': [[0, 1, 5, 4], [1, 3, 7, 5], [3, 2, 6, 7], [2, 0, 4, 6], [0, 2, 3, 1], [4, 5, 7, 6]]
     }

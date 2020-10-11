@@ -6,13 +6,13 @@ from src.Utilities.field import Field
 
 def Green_Guass(mesh: Mesh):
     phi_f = mesh.topology.face_interpolate(mesh.phi)
+    print(phi_f.shape)
+    print(me.phi.shape)
     cv = mesh.topology.cells.volume
     Sf = mesh.topology.internal.vector
     af = phi_f * Sf
     _, dim = mesh.phi.shape
     grad = Field(np.zeros((mesh.topology.info.cells, 3)), af.unit)
-    print(af.shape)
-    print(grad.shape)
     np.add.at(grad, mesh.topology.internal.owner, af)
     np.subtract.at(grad, mesh.topology.internal.neighbour, af)
 
@@ -47,6 +47,7 @@ if __name__ == '__main__':
     foam = connectivity_to_foam(conn)
     foam['unit'] = 'm'
     top = Topology(foam)
+    print(np.sum(np.abs(top.cells.volume)))
     me = Mesh(top)
     zero = Field(0,'K/m')
     me.set_BC(1, zero, 'flux', 'wall')
@@ -55,6 +56,7 @@ if __name__ == '__main__':
     me.set_BC(0, zero, 'flux', 'wall')
     me.phi = Field(norm(me.topology.cells.center), 'K') * 100
     gradient = Green_Guass(me)
+
 
     import matplotlib.pyplot as plt
 

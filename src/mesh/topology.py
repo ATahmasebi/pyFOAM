@@ -75,7 +75,8 @@ class Topology(object):
             raise ValueError('Cannot interpolate values to faces.')
 
 if __name__ == '__main__':
-    path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
+    path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test0.mphtxt'
+    #  'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
     from src.conversion.convert import connectivity_to_foam
 
@@ -84,6 +85,8 @@ if __name__ == '__main__':
     foam = connectivity_to_foam(conn)
     foam['unit'] = 'm'
     top = Topology(foam)
-    print(top.boundary)
-    print(top.internal)
-    print(top.cells)
+    for b in top.boundary:
+        print(np.sum(b.center, axis=0)/len(b.owner))
+        a = np.sum(b.vector, axis= 0)
+        print(a)
+    print(np.sum(top.cells.volume))
