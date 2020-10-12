@@ -18,7 +18,7 @@ class Field(np.ndarray):
         out_unit = self.unit
         args = [i.view(np.ndarray) if isinstance(i, Field) else i for i in inputs]
         if len(inputs) > 1 and isinstance(inputs[0], Field) and isinstance(inputs[-1], Field):
-            if operation == 'multiply':
+            if operation in ['multiply', 'matmul']:
                 out_unit *= inputs[1].unit
             elif operation in ['add', 'subtract'] and method != 'reduce':
                 cr = inputs[-1].unit.conversion_ratio(out_unit)

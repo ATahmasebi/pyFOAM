@@ -66,8 +66,16 @@ class Topology(object):
         faces = self.internal
         return cells.center[faces.owner] - faces.center
 
+    @on_demand_prop
+    def ip(self):
+        return self.cells.center[self.internal.neighbour] + self.dCF * dot(self.dCF, self.dCf) / dot(self.dCF, self.dCF)
+
+    @on_demand_prop
+    def ff(self):
+        return self.internal.center - self.ip
+
     def face_interpolate(self, gamma):
-        if gamma.shape == (self.info.cells, 1):
+        if gamma.shape == (self.info.cells, 1) or gamma.shape == (self.info.cells, 3):
             return gamma[self.internal.owner] * (1 - self.gf) + gamma[self.internal.neighbour] * self.gf
         elif gamma.shape == () or gamma.shape == (1, ):
             return gamma
@@ -75,8 +83,8 @@ class Topology(object):
             raise ValueError('Cannot interpolate values to faces.')
 
 if __name__ == '__main__':
-    path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test0.mphtxt'
-    #  'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
+    # path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test0.mphtxt'
+    path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
     from src.conversion.convert import connectivity_to_foam
 
@@ -85,8 +93,5 @@ if __name__ == '__main__':
     foam = connectivity_to_foam(conn)
     foam['unit'] = 'm'
     top = Topology(foam)
-    for b in top.boundary:
-        print(np.sum(b.center, axis=0)/len(b.owner))
-        a = np.sum(b.vector, axis= 0)
-        print(a)
-    print(np.sum(top.cells.volume))
+    print(top.ff)
+    print(top.internal)
