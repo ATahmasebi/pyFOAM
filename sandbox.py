@@ -9,7 +9,8 @@ from scipy.sparse.linalg import splu
 from time import perf_counter
 
 
-f1 = Field([[1,2,3], [4,5,6], [7,8,9], [1,2,3], [4,5,6], [7,8,9]], 'm')
+d = np.array([[1, 0, 0], [0, 10, 0], [0, 0, 12]])
 
-print(f1.T @ f1)
+print(d)
+print(np.linalg.inv(d))
 

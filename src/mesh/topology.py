@@ -1,5 +1,6 @@
 import numpy as np
 
+
 from src.Utilities.field import Field
 from src.Utilities.field_operations import *
 from src.mesh.primitives import boundary_faces, internal_faces, cell, info, on_demand_prop
@@ -24,28 +25,28 @@ class Topology(object):
         f_index, owner, neighbour = np.array(elements['internal'], dtype=int).transpose()
         self.internal = internal_faces(fc[f_index], fv[f_index], owner, neighbour)
         f_index, owner, patch = np.array(elements['boundaries'], dtype=int).transpose()
-        boundaries = boundary_faces(fc[f_index], fv[f_index], owner, patch)
-        self.boundary = []
-        for p in range(np.max(boundaries.patch) + 1):
-            index = boundaries.patch == p
-            ow = boundaries.owner[index]
-            fc = boundaries.center[index]
-            fv = boundaries.vector[index]
-            self.boundary.append(boundary_faces(fc, fv, ow, p))
+        self.boundary = boundary_faces(fc[f_index], fv[f_index], owner, patch)
+        #self.boundary = []
+        ##for p in range(np.max(boundaries.patch) + 1):
+        ##    index = boundaries.patch == p
+        ##    ow = boundaries.owner[index]
+        ##    fc = boundaries.center[index]
+        ##    fv = boundaries.vector[index]
+        #    self.boundary.append(boundary_faces(fc, fv, ow, p))
 
         pvi = dot(self.internal.center, self.internal.vector) / 3
         cv = Field(np.zeros((self.info.cells, 1)), pvi.unit)
         np.add.at(cv, self.internal.owner, pvi)
         np.subtract.at(cv, self.internal.neighbour, pvi)
-        pvb = dot(boundaries.center, boundaries.vector) / 3
-        np.add.at(cv, boundaries.owner, pvb)
+        pvb = dot(self.boundary.center, self.boundary.vector) / 3
+        np.add.at(cv, self.boundary.owner, pvb)
 
         pci = 0.75 * self.internal.center * pvi
-        pcb = 0.75 * boundaries.center * pvb
+        pcb = 0.75 * self.boundary.center * pvb
         cc = Field(np.zeros((self.info.cells, 3)), pci.unit)
         np.add.at(cc, self.internal.owner, pci)
         np.subtract.at(cc, self.internal.neighbour, pci)
-        np.add.at(cc, boundaries.owner, pcb)
+        np.add.at(cc, self.boundary.owner, pcb)
         cc = cc / cv
         self.cells = cell(cc, cv)
 
@@ -61,6 +62,12 @@ class Topology(object):
         return cells.center[faces.owner] - cells.center[faces.neighbour]
 
     @on_demand_prop
+    def dCb(self):
+        cells = self.cells
+        faces = self.boundary
+        return cells.center[faces.owner] - faces.center
+
+    @on_demand_prop
     def dCf(self):
         cells = self.cells
         faces = self.internal
@@ -68,7 +75,25 @@ class Topology(object):
 
     @on_demand_prop
     def ip(self):
-        return self.cells.center[self.internal.neighbour] + self.dCF * dot(self.dCF, self.dCf) / dot(self.dCF, self.dCF)
+        cells = self.cells
+        faces = self.internal
+        dCF = self.dCF
+        dCf = self.dCf
+        return cells.center[faces.neighbour] + dCF * dot(dCF, dCf) / dot(dCF, dCF)
+
+    @on_demand_prop
+    def Ginv(self):
+        d = self.dCF.reshape((-1, 1, 3))
+        dt = self.dCF.reshape((-1, 3, 1))
+        dtd = dt@d
+        G = Field(np.zeros((self.info.cells, 3, 3)), dtd.unit)
+        np.add.at(G, self.internal.owner, dtd)
+        np.add.at(G, self.internal.neighbour, dtd)
+        db = self.dCb.reshape((-1, 1, 3))
+        dbt = self.dCb.reshape((-1, 3, 1))
+        dbtdb = dbt@db
+        np.add.at(G, self.boundary.owner, dbtdb)
+        return np.linalg.inv(G)
 
     @on_demand_prop
     def ff(self):
@@ -93,5 +118,4 @@ if __name__ == '__main__':
     foam = connectivity_to_foam(conn)
     foam['unit'] = 'm'
     top = Topology(foam)
-    print(top.ff)
-    print(top.internal)
+    print(top.Ginv)

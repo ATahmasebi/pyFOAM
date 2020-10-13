@@ -36,6 +36,12 @@ class Field(np.ndarray):
 
         return Field(super(Field, self).__array_ufunc__(ufunc, method, *args, **kwargs), out_unit)
 
+    def __setitem__(self, key, value):
+        if isinstance(value, Field):
+            if value.unit != self.unit:
+                value = value.convert(self.unit)
+        return super(Field, self).__setitem__(key, value)
+    
     def __repr__(self):
         arr_str = super().__repr__()
         return f'{arr_str[:-1]}, \'{str(self.unit)}\'{arr_str[-1]}'
@@ -49,8 +55,4 @@ class Field(np.ndarray):
 
 
 if __name__ == '__main__':
-    f = Field([1, 0, 3], 'cm')
-    d = Field(np.random.rand(9).reshape((3,3)),'m')
-    print(d)
-    d[[1,2]] = f
-    print(d)
+    pass
