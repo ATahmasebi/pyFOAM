@@ -36,7 +36,7 @@ def laplacian(gamma, mesh: Mesh, correction='or'):
         p = mesh.BC[boundary.patch]
         if p.type == 'value':
             phi_b = p.values
-            dCb = norm(mesh.topology.cells[boundary.owner] - boundary.center)
+            dCb = norm(mesh.topology.dCb)
             abf = gamma_bf * Sb / dCb  # check later!normal distance?!
             mesh.LS.lhs_add(boundary.owner, boundary.owner, abf)
             abf_phib = phi_b * abf

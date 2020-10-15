@@ -1,4 +1,5 @@
 from collections import namedtuple
+from src.Utilities.field_operations import norm
 
 cell = namedtuple('cell', 'center volume')
 boundary_faces = namedtuple('boundaries', 'center vector owner patch')
@@ -18,4 +19,5 @@ def on_demand_prop(fn):
         if not hasattr(self, attr_name):
             setattr(self, attr_name, fn(self))
         return getattr(self, attr_name)
+
     return _lazy_property

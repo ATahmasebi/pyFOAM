@@ -2,7 +2,7 @@ import numpy as np
 
 
 from src.Utilities.field import Field
-from src.Utilities.field_operations import *
+from src.Utilities.field_operations import cross, dot, norm
 from src.mesh.primitives import boundary_faces, internal_faces, cell, info, on_demand_prop
 
 
@@ -26,13 +26,13 @@ class Topology(object):
         self.internal = internal_faces(fc[f_index], fv[f_index], owner, neighbour)
         f_index, owner, patch = np.array(elements['boundaries'], dtype=int).transpose()
         self.boundary = boundary_faces(fc[f_index], fv[f_index], owner, patch)
-        #self.boundary = []
-        ##for p in range(np.max(boundaries.patch) + 1):
-        ##    index = boundaries.patch == p
-        ##    ow = boundaries.owner[index]
-        ##    fc = boundaries.center[index]
-        ##    fv = boundaries.vector[index]
-        #    self.boundary.append(boundary_faces(fc, fv, ow, p))
+        # self.boundary = []
+        # for p in range(np.max(boundaries.patch) + 1):
+        #     index = boundaries.patch == p
+        #     ow = boundaries.owner[index]
+        #     fc = boundaries.center[index]
+        #     fv = boundaries.vector[index]
+        #     self.boundary.append(boundary_faces(fc, fv, ow, p))
 
         pvi = dot(self.internal.center, self.internal.vector) / 3
         cv = Field(np.zeros((self.info.cells, 1)), pvi.unit)
@@ -62,16 +62,28 @@ class Topology(object):
         return cells.center[faces.owner] - cells.center[faces.neighbour]
 
     @on_demand_prop
+    def ndCF(self):
+        return norm(self.dCF)
+
+    @on_demand_prop
     def dCb(self):
         cells = self.cells
         faces = self.boundary
         return cells.center[faces.owner] - faces.center
 
     @on_demand_prop
+    def ndCb(self):
+        return norm(self.dCb)
+
+    @on_demand_prop
     def dCf(self):
         cells = self.cells
         faces = self.internal
         return cells.center[faces.owner] - faces.center
+
+    @on_demand_prop
+    def ndCf(self):
+        return norm(self.dCf)
 
     @on_demand_prop
     def ip(self):
@@ -99,6 +111,10 @@ class Topology(object):
     def ff(self):
         return self.internal.center - self.ip
 
+    @on_demand_prop
+    def nff(self):
+        return norm(self.ff)
+
     def face_interpolate(self, gamma):
         if gamma.shape == (self.info.cells, 1) or gamma.shape == (self.info.cells, 3):
             return gamma[self.internal.owner] * (1 - self.gf) + gamma[self.internal.neighbour] * self.gf
@@ -106,6 +122,7 @@ class Topology(object):
             return gamma
         else:
             raise ValueError('Cannot interpolate values to faces.')
+
 
 if __name__ == '__main__':
     # path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test0.mphtxt'
@@ -118,4 +135,3 @@ if __name__ == '__main__':
     foam = connectivity_to_foam(conn)
     foam['unit'] = 'm'
     top = Topology(foam)
-    print(top.Ginv)

@@ -1,7 +1,5 @@
 import numpy as np
 import src.Utilities.Units as Units
-from src.Utilities.field_operations import norm
-from src.mesh.primitives import on_demand_prop
 
 
 class Field(np.ndarray):
@@ -36,19 +34,10 @@ class Field(np.ndarray):
             elif operation == 'sqrt':
                 out_unit = out_unit ** 0.5
 
-        return Field(super(Field, self).__array_ufunc__(ufunc, method, *args, **kwargs), out_unit)
-
-    @on_demand_prop
-    def norm(self):
-        _, dim = self.shape
-        if dim == 3:
-            return norm(self)
-        # warn abou norm of non vector?
-        return self
+        cls = type(self)
+        return cls(super(Field, self).__array_ufunc__(ufunc, method, *args, **kwargs), out_unit)
 
     def __setitem__(self, key, value):
-        if hasattr(self, '_lazy_norm'):
-            delattr(self, '_lazy_norm')
         if isinstance(value, Field):
             if value.unit != self.unit:
                 value = value.convert(self.unit)
@@ -67,4 +56,19 @@ class Field(np.ndarray):
 
 
 if __name__ == '__main__':
-    pass
+    d =np.array([[1,2,3],[3,4,5],[5,6,7]])
+    f =Field(d, 'ms')
+
+    from src.Utilities.field_operations import norm
+    from src.mesh.primitives import on_demand_prop
+
+    class Vector(Field):
+        def norm(self):
+            return norm(self)
+
+    v = Vector(d, 'm')
+
+    print(v)
+    print(v.norm())
+
+

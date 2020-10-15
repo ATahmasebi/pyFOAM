@@ -7,6 +7,7 @@ from src.Utilities.field import Field
 def least_sqr(mesh: Mesh):
     pass
 
+
 def Green_Guass(mesh: Mesh, corr: int):
     grad = Field(np.zeros_like(mesh.topology.cells.center), f'{mesh.phi.unit}/{mesh.topology.info.unit}')
     phi_f = mesh.topology.face_interpolate(mesh.phi)
@@ -15,7 +16,7 @@ def Green_Guass(mesh: Mesh, corr: int):
     dCF = mesh.topology.dCF
     n2dCF = dot(dCF, dCF)
     ngrad = ((mesh.phi[mesh.topology.internal.owner] - mesh.phi[mesh.topology.internal.neighbour]) / n2dCF) * dCF
-    for step in range(corr+1):
+    for step in range(corr + 1):
         grad_f = mesh.topology.face_interpolate(grad)
         grad_ff = grad_f - (dot(grad_f, dCF) / n2dCF) * dCF + ngrad
         phi_ff = phi_f + dot(mesh.topology.ff, grad_ff)
@@ -36,7 +37,7 @@ def Green_Guass(mesh: Mesh, corr: int):
                 dphi_dn = p.values
                 dCb = mesh.topology.cells.center[boundary.owner] - boundary.center
                 norm_dist = Sb * dot(dCb, Sb) / dot(Sb, Sb)
-                phi_b = mesh.phi[boundary.owner] + (dphi_dn * norm_dist) # plus or minus???????????????
+                phi_b = mesh.phi[boundary.owner] + (dphi_dn * norm_dist)  # plus or minus???????????????
                 afb = phi_b * Sb
                 np.add.at(grad, boundary.owner, afb)
             elif p.type == 'robin':
@@ -61,22 +62,21 @@ if __name__ == '__main__':
     for b in me.topology.boundary:
         v = Field(dot(b.center, b.center) * 100, 'K')
         me.set_BC(b.patch, v, 'value', 'wall')
-    me.phi = Field(dot(me.topology.cells.center, me.topology.cells.center), 'K') *100
+    me.phi = Field(dot(me.topology.cells.center, me.topology.cells.center), 'K') * 100
     gradient = Green_Guass(me, 1)
 
     import matplotlib.pyplot as plt
 
     fig = plt.figure()
     ax = fig.gca()
-    x = me.topology.cells.center[:, 0] # me.topology.internal.center[:,0] # me.topology.internal.center[:,0] #
-    y = me.topology.cells.center[:, 1] # me.topology.internal.center[:,1] # me.topology.cells.center[:, 1] #
-    #z = np.array(norm(me.topology.cells.center).reshape((-1,))) *200
-    #z = np.array(me.topology.face_interpolate(me.phi)[:,0])
+    x = me.topology.cells.center[:, 0]  # me.topology.internal.center[:,0] # me.topology.internal.center[:,0] #
+    y = me.topology.cells.center[:, 1]  # me.topology.internal.center[:,1] # me.topology.cells.center[:, 1] #
+    # z = np.array(norm(me.topology.cells.center).reshape((-1,))) *200
+    # z = np.array(me.topology.face_interpolate(me.phi)[:,0])
     z = np.array(norm(gradient).reshape((-1,)))
     ax.tricontour(x, y, z, levels=14, linewidths=0.5, colors='k')
     cntr2 = ax.tricontourf(x, y, z, levels=14, cmap="RdBu_r")
 
     fig.colorbar(cntr2, ax=ax)
-    #ax.plot(x, y, 'ko', ms=3)
+    # ax.plot(x, y, 'ko', ms=3)
     plt.show()
-
