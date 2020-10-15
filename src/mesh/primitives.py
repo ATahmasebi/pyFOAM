@@ -1,5 +1,4 @@
 from collections import namedtuple
-from src.Utilities.field_operations import norm
 
 cell = namedtuple('cell', 'center volume')
 boundary_faces = namedtuple('boundaries', 'center vector owner patch')

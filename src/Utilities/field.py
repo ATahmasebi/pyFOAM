@@ -15,24 +15,30 @@ class Field(np.ndarray):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         operation = ufunc.__name__
-        out_unit = self.unit
         args = [i.view(np.ndarray) if isinstance(i, Field) else i for i in inputs]
-        if len(inputs) > 1 and isinstance(inputs[0], Field) and isinstance(inputs[-1], Field):
-            if operation in ['multiply', 'matmul']:
-                out_unit *= inputs[1].unit
-            elif operation in ['add', 'subtract'] and method != 'reduce':
-                cr = inputs[-1].unit.conversion_ratio(out_unit)
-                if cr != 1.0:
-                    args[1] *= cr
-            elif operation in ['divide', 'true_divide', 'floor_divide']:
-                out_unit /= inputs[1].unit
-        else:
-            if operation == 'power':
-                out_unit = out_unit ** inputs[-1]
-            elif operation == 'square':
-                out_unit = out_unit ** 2
-            elif operation == 'sqrt':
-                out_unit = out_unit ** 0.5
+        out_unit = self.unit
+        if operation in ['multiply', 'matmul']:
+            other = inputs[1] if inputs[0] is self else inputs[0]
+            if isinstance(other, Field):
+                out_unit *= other.unit
+        elif operation in ['add', 'subtract'] and method != 'reduce':
+            for j, i in enumerate(inputs):
+                if isinstance(i, Field) and i.unit != self.unit:
+                    cr = i.unit.conversion_ratio(out_unit)
+                    args[j] *= cr
+        elif operation in ['divide', 'true_divide', 'floor_divide']:
+            if isinstance(inputs[1], Field):
+                if isinstance(inputs[0], Field):
+                    out_unit /= inputs[1].unit
+                else:
+                    out_unit = out_unit ** -1
+
+        elif operation == 'power':
+            out_unit = out_unit ** inputs[-1]
+        elif operation == 'square':
+            out_unit = out_unit ** 2
+        elif operation == 'sqrt':
+            out_unit = out_unit ** 0.5
 
         cls = type(self)
         return cls(super(Field, self).__array_ufunc__(ufunc, method, *args, **kwargs), out_unit)
@@ -42,7 +48,7 @@ class Field(np.ndarray):
             if value.unit != self.unit:
                 value = value.convert(self.unit)
         return super(Field, self).__setitem__(key, value)
-    
+
     def __repr__(self):
         arr_str = super().__repr__()
         return f'{arr_str[:-1]}, \'{str(self.unit)}\'{arr_str[-1]}'
@@ -57,5 +63,3 @@ class Field(np.ndarray):
 
 if __name__ == '__main__':
     pass
-
-

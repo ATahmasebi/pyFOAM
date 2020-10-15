@@ -1,6 +1,6 @@
 import numpy as np
 from src.mesh.mesh import Mesh
-from src.Utilities.field_operations import dot, norm
+from src.Utilities.vector import VectorField, dot, norm
 from src.Utilities.field import Field
 
 
@@ -59,9 +59,9 @@ if __name__ == '__main__':
     foam['unit'] = 'm'
     top = Topology(foam)
     me = Mesh(top)
-    for b in me.topology.boundary:
-        v = Field(dot(b.center, b.center) * 100, 'K')
-        me.set_BC(b.patch, v, 'value', 'wall')
+    b = me.topology.boundary
+    v = Field(dot(b.center, b.center) * 100, 'K')
+    #me.set_BC(b.patch, v, 'value', 'wall')
     me.phi = Field(dot(me.topology.cells.center, me.topology.cells.center), 'K') * 100
     gradient = Green_Guass(me, 1)
 

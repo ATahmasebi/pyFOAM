@@ -57,3 +57,7 @@ class VectorField(Field):
     @on_demand_prop
     def norm(self):
         return norm(self)
+
+
+if __name__ == '__main__':
+    pass

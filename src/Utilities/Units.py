@@ -264,4 +264,3 @@ CGS = UnitSet(Centimeter, Gram, Second)
 FPS = UnitSet(Foot, Pound, Second)
 
 # TODO: Work on FPS specific names and unit, add more known units : atm, ....
-
