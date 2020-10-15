@@ -5,6 +5,8 @@ import pystencils as ps
 from src.Utilities.field import Field
 from src.mesh.primitives import on_demand_prop
 
+__all__ = ['cross', 'dot', 'triple', 'norm', 'VectorField']
+
 e0, e, a, b, c = ps.fields('e0,e(3),a(3),b(3),c(3):[1D]')
 
 cross_assignment = ps.AssignmentCollection([

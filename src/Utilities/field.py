@@ -56,19 +56,6 @@ class Field(np.ndarray):
 
 
 if __name__ == '__main__':
-    d =np.array([[1,2,3],[3,4,5],[5,6,7]])
-    f =Field(d, 'ms')
-
-    from src.Utilities.field_operations import norm
-    from src.mesh.primitives import on_demand_prop
-
-    class Vector(Field):
-        def norm(self):
-            return norm(self)
-
-    v = Vector(d, 'm')
-
-    print(v)
-    print(v.norm())
+    pass
 
 
