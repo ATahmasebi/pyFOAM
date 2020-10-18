@@ -1,10 +1,12 @@
-from src.mesh.primitives import patch
+from src.Utilities.primitives import patch
 from src.Utilities.liniearsystem import LinearSystem
+from src.mesh.boundarypatch import BoundaryPatchField as bpf
 
 
 class Mesh:
     def __init__(self, topology):
         self.topology = topology
+        self.boondrypatch = bpf
         self.BC = {}
         self.LS = LinearSystem(self.topology.info.cells)
         self.phi = None

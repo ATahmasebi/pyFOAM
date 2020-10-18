@@ -1,5 +1,3 @@
-import numpy as np
-import pystencils as ps
 from src.Utilities.field_operations import *
 from collections import namedtuple
 
@@ -30,7 +28,7 @@ if __name__ == '__main__':
     path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
     from src.conversion.convert import connectivity_to_foam
-    from src.mesh.primitives import Topology
+    from src.Utilities.primitives import Topology
     elem = read_comsol_file(path)
     conn = build_element_connectivity(elem)
     foam = connectivity_to_foam(conn)

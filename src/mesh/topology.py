@@ -3,7 +3,7 @@ import numpy as np
 
 from src.Utilities.field import Field
 from src.Utilities.vector import *
-from src.mesh.primitives import boundary_faces, internal_faces, cell, info, on_demand_prop
+from src.Utilities.primitives import boundary_faces, internal_faces, cell, info, on_demand_prop
 
 
 class Topology(object):
@@ -83,24 +83,28 @@ class Topology(object):
 
     @on_demand_prop
     def Ginv(self):
+        w = self.dCF.norm.reshape((-1, 1, 1))
         d = self.dCF.reshape((-1, 1, 3))
-        dt = self.dCF.reshape((-1, 3, 1))
+        dt = self.dCF.reshape((-1, 3, 1)) / w
         dtd = dt@d
         G = Field(np.zeros((self.info.cells, 3, 3)), dtd.unit)
         np.add.at(G, self.internal.owner, dtd)
         np.add.at(G, self.internal.neighbour, dtd)
         db = self.dCb.reshape((-1, 1, 3))
-        dbt = self.dCb.reshape((-1, 3, 1))
+        wb = self.dCb.norm.reshape((-1, 1, 1))
+        dbt = self.dCb.reshape((-1, 3, 1)) / wb
         dbtdb = dbt@db
         np.add.at(G, self.boundary.owner, dbtdb)
-        return np.linalg.inv(G)
+        ginv = np.linalg.inv(G)
+        ginv.unit = G.unit ** -1
+        return ginv
 
     @on_demand_prop
     def ff(self):
         return self.internal.center - self.ip
 
     def face_interpolate(self, gamma):
-        if gamma.shape == (self.info.cells, 1) or gamma.shape == (self.info.cells, 3):
+        if len(gamma) == self.info.cells:
             return gamma[self.internal.owner] * (1 - self.gf) + gamma[self.internal.neighbour] * self.gf
         elif gamma.shape == () or gamma.shape == (1, ):
             return gamma
@@ -109,7 +113,7 @@ class Topology(object):
 
 
 if __name__ == '__main__':
-    # path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test0.mphtxt'
+    # path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test00.mphtxt'
     path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
     from src.conversion.convert import connectivity_to_foam
@@ -119,3 +123,4 @@ if __name__ == '__main__':
     foam = connectivity_to_foam(conn)
     foam['unit'] = 'm'
     top = Topology(foam)
+    print(top.Ginv)

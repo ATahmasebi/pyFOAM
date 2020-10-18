@@ -3,7 +3,7 @@ import pystencils as ps
 
 
 from src.Utilities.field import Field
-from src.mesh.primitives import on_demand_prop
+from src.Utilities.primitives import on_demand_prop
 
 __all__ = ['cross', 'dot', 'triple', 'norm', 'VectorField']
 
@@ -57,6 +57,10 @@ class VectorField(Field):
     @on_demand_prop
     def norm(self):
         return norm(self)
+
+    @on_demand_prop
+    def unit_vector(self):
+        return self / self.norm
 
 
 if __name__ == '__main__':
