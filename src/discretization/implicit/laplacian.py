@@ -1,10 +1,10 @@
 import numpy as np
 from src.mesh.mesh import Mesh
-from src.Utilities.field_operations import dot, norm
-from src.Utilities.field import Field
+from src.Utilities.field import Field, dot
+from src.discretization.explicit.grad import least_sqr as gradient
 
 
-def laplacian(gamma, mesh: Mesh, correction='or'):
+def laplacian(gamma: Field, mesh: Mesh, correction='or'):
     gamma_f = mesh.topology.face_interpolate(gamma)
     dCF = mesh.topology.dCF
     Sf = mesh.topology.internal.vector
@@ -18,7 +18,7 @@ def laplacian(gamma, mesh: Mesh, correction='or'):
         Ef = Sf
     else:
         raise ValueError('invalid orthogonal correction method.')
-    af = gamma_f * norm(Ef) / norm(dCF)
+    af = gamma_f * Ef.norm / dCF.norm
     naf = -af
     owner = mesh.topology.internal.owner
     neighbour = mesh.topology.internal.neighbour
@@ -27,29 +27,45 @@ def laplacian(gamma, mesh: Mesh, correction='or'):
     mesh.LS.lhs_add(owner, neighbour, naf)
     mesh.LS.lhs_add(neighbour, owner, naf)
 
-    for boundary in mesh.topology.boundary:
-        if gamma.shape == (mesh.topology.info.cells, 1):
-            gamma_bf = gamma_f[boundary.owner]
-        else:
-            gamma_bf = gamma
-        Sb = norm(boundary.vector)
-        p = mesh.BC[boundary.patch]
-        if p.type == 'value':
-            phi_b = p.values
-            dCb = norm(mesh.topology.dCb)
-            abf = gamma_bf * Sb / dCb  # check later!normal distance?!
-            mesh.LS.lhs_add(boundary.owner, boundary.owner, abf)
-            abf_phib = phi_b * abf
-            _, dim = abf_phib.shape
-            rhs = Field(np.zeros(shape=(mesh.topology.info.cells, dim)), abf_phib.unit)
-            rhs[boundary.owner] = abf_phib
-            mesh.LS.rhs_add(rhs)
-        elif p.type == 'flux':
-            values = -gamma_bf * Sb * p.values  # Minus sighn??????????
-            _, dim = values.shape
-            rhs = Field(np.zeros(shape=(mesh.topology.info.cells, dim)), values.unit)
-            rhs[boundary.owner] = values
-            mesh.LS.rhs_add(rhs)
-        elif p.type == 'robin':
-            pass
-    # correction!!!!!!!!!!
+    if len(gamma) == mesh.topology.info.cells:
+        gamma_bf = gamma_f[mesh.topology.boundary.owner]
+    else:
+        gamma_bf = gamma
+    Sb = mesh.topology.boundary.vector
+    phi_b = mesh.boundarypatch
+    ndCb = mesh.topology.ndCb
+    abf = gamma_bf * Sb.norm / ndCb
+    abf_phib = phi_b * abf
+    _, dim = abf_phib.shape
+    rhs = Field(np.zeros(shape=(mesh.topology.info.cells, dim, 1)), abf_phib.unit)
+    rhs[mesh.topology.boundary.owner] = abf_phib
+
+    # correction:
+    if correction in ['or', 'oc', 'mc']:
+        Tf = Sf - Ef
+        grad = gradient(mesh)
+        grad_f = mesh.topology.face_interpolate(grad)
+        ac = gamma_f * (grad_f @ Tf)
+        np.add.at(rhs, owner, ac)
+
+    mesh.LS.rhs_add(rhs)
+
+
+if __name__ == '__main__':
+    path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test0.mphtxt'
+    # path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
+    from src.conversion.comsol import read_comsol_file, build_element_connectivity
+    from src.conversion.convert import connectivity_to_foam
+    from src.mesh.topology import Topology
+
+    elem = read_comsol_file(path)
+    conn = build_element_connectivity(elem)
+    foam = connectivity_to_foam(conn)
+    foam['unit'] = 'm'
+    top = Topology(foam)
+    me = Mesh(top)
+    b = me.topology.boundary
+    me.boundarypatch = Field(dot(b.center, b.center) * 100, 'K')
+    # me.boondrypatch = Field(b.center[:,0]**2 * 100, 'K').reshape((-1, 1))
+
+    me.phi = Field(dot(me.topology.cells.center, me.topology.cells.center), 'K') * 100

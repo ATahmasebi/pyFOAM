@@ -6,7 +6,7 @@ Mass, Length, Time, Temperature, Quantity, Current, Luminous_intensity = 'M L T 
 
 
 class Unit:
-    known_units = {}
+    __known_units = {}
 
     def __new__(cls, baseunits):
         if isinstance(baseunits, str):
@@ -20,39 +20,39 @@ class Unit:
         if isinstance(baseunit, BaseUnit):
             self.symbol = baseunit.symbol
             self.baseunits[baseunit] = 1
-            self.known_units[baseunit.symbol] = self
+            self.__known_units[baseunit.symbol] = self
 
     @staticmethod
     def parse(input_string):
-        if input_string in Unit.known_units:
-            return Unit.known_units[input_string]
+        if input_string in Unit.__known_units:
+            return Unit.__known_units[input_string]
         ans = Unit(None)
         if '/' in input_string:
             numerator, denominator = input_string.split('/')
             for u in denominator.split('.'):
                 if '**' in u:
                     u, p = u.split('**')
-                    ans /= (Unit.known_units[u]) ** int(p)
+                    ans /= (Unit.__known_units[u]) ** int(p)
                 else:
-                    ans /= Unit.known_units[u]
+                    ans /= Unit.__known_units[u]
         else:
             numerator = input_string
         for u in numerator.split('.'):
             if '**' in u:
                 u, p = u.split('**')
-                ans *= (Unit.known_units[u]) ** int(p)
+                ans *= (Unit.__known_units[u]) ** int(p)
             else:
-                ans *= Unit.known_units[u]
+                ans *= Unit.__known_units[u]
         key = str(ans)
-        if key in Unit.known_units:
-            return Unit.known_units[key]
+        if key in Unit.__known_units:
+            return Unit.__known_units[key]
         else:
             return ans
 
     def set_symbol(self, symbol):
         self.symbol = symbol
-        self.known_units[symbol] = self
-        self.known_units[str(self)] = self
+        self.__known_units[symbol] = self
+        self.__known_units[str(self)] = self
 
     @staticmethod
     def from_unit(unit, symbol, factor):
@@ -99,8 +99,8 @@ class Unit:
             numerator.sort()
             denominator.sort()
             ans = ('.'.join(numerator) if len(numerator) != 0 else '1') + '/' + '.'.join(denominator)
-        if ans in self.known_units:
-            ans = self.known_units[ans].symbol
+        if ans in self.__known_units:
+            ans = self.__known_units[ans].symbol
         return ans
 
     def __repr__(self):
@@ -128,6 +128,8 @@ class Unit:
         return '.'.join(self_properties) == '.'.join(other_properties)
 
     def conversion_ratio(self, other):
+        if isinstance(other, str):
+            other = Unit.parse(other)
         if self.iscompatible(other):
             ratio = 1
             for k, v in other.baseunits.items():

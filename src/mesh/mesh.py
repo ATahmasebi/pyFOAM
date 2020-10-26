@@ -6,7 +6,7 @@ from src.mesh.boundarypatch import BoundaryPatchField as bpf
 class Mesh:
     def __init__(self, topology):
         self.topology = topology
-        self.boondrypatch = bpf
+        self.boundarypatch = bpf
         self.BC = {}
         self.LS = LinearSystem(self.topology.info.cells)
         self.phi = None

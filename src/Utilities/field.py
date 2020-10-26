@@ -1,5 +1,8 @@
 import numpy as np
+import pystencils as ps
+
 import src.Utilities.Units as Units
+from src.Utilities.primitives import on_demand_prop, vector, scaler
 
 
 class Field(np.ndarray):
@@ -59,6 +62,61 @@ class Field(np.ndarray):
     def convert(self, unit):
         cr = self.unit.conversion_ratio(unit)
         return Field(cr * self, unit)
+
+    @on_demand_prop
+    def norm(self):
+        return norm(self.reshape(vector))
+
+
+e0, e, a, b, c = ps.fields('e0,e(3),a(3),b(3),c(3):[1D]')
+cross_assignment = ps.AssignmentCollection([
+    ps.Assignment(e[0](0), a[0](1) * b[0](2) - a[0](2) * b[0](1)),
+    ps.Assignment(e[0](1), a[0](2) * b[0](0) - a[0](0) * b[0](2)),
+    ps.Assignment(e[0](2), a[0](0) * b[0](1) - a[0](1) * b[0](0))])
+cross_kf = ps.create_kernel(cross_assignment).compile()
+
+
+def cross(A, B):
+    _a = A.reshape((-1, 3))
+    _b = B.reshape((-1, 3))
+    arr = np.empty(shape=_a.shape)
+    unit = A.unit * B.unit
+    cross_kf(a=_a, b=_b, e=arr)
+    return Field(arr, unit).reshape(vector)
+
+
+dot_assignment = ps.Assignment(e0[0], a[0](0) * b[0](0) + a[0](1) * b[0](1) + a[0](2) * b[0](2))
+dot_kf = ps.create_kernel(dot_assignment).compile()
+
+
+def dot(A, B):
+    _a = A.reshape((-1, 3))
+    _b = B.reshape((-1, 3))
+    arr = np.empty(shape=(len(_a), 1))
+    unit = A.unit * B.unit
+    dot_kf(a=_a, b=_b, e0=arr)
+    return Field(arr, unit).reshape(scaler)
+
+
+triple_assignment = ps.Assignment(e0[0],
+                                  (a[0](1) * b[0](2) - a[0](2) * b[0](1)) * c[0](0) +
+                                  (a[0](2) * b[0](0) - a[0](0) * b[0](2)) * c[0](1) +
+                                  (a[0](0) * b[0](1) - a[0](1) * b[0](0)) * c[0](2))
+triple_kf = ps.create_kernel(triple_assignment).compile()
+
+
+def triple(A, B, C):
+    _a = A.reshape((-1, 3))
+    _b = B.reshape((-1, 3))
+    _c = C.reshape((-1, 3))
+    arr = np.empty(shape=(len(_a), 1))
+    unit = A.unit * B.unit * C.unit
+    triple_kf(a=_a, b=_b, c=_c, e0=arr)
+    return Field(arr, unit).reshape(scaler)
+
+
+def norm(A):
+    return np.sqrt(dot(A, A))
 
 
 if __name__ == '__main__':

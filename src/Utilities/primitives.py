@@ -1,5 +1,9 @@
 from collections import namedtuple
 
+scaler = (-1, 1, 1)
+vector = (-1, 3, 1)
+tensor = (-1, 3, 3)
+
 cell = namedtuple('cell', 'center volume')
 boundary_faces = namedtuple('boundaries', 'center vector owner patch')
 internal_faces = namedtuple('internal', 'center vector owner neighbour')
