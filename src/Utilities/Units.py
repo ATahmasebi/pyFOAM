@@ -160,7 +160,7 @@ Gram = Unit(BaseUnit('gr', Mass, 1e-3))
 Milligram = Unit(BaseUnit('mg', Mass, 1e-6))
 Kilogram = Unit(BaseUnit('kg', Mass, 1))
 Tonne = Unit(BaseUnit('t', Mass, 1e3))
-Pound = Unit(BaseUnit('Ib', Mass, 0.453592))
+Pound = Unit(BaseUnit('lb', Mass, 0.453592))
 Ounce = Unit(BaseUnit('oz', Mass, 0.0283495))
 
 # Time #
@@ -195,9 +195,11 @@ Hertz.set_symbol('Hz')
 
 Newton = Kilogram * Meter / Second ** 2
 Newton.set_symbol('N')
+Pound_force = Unit.from_unit(Newton, 'lbf', 4.4482216)
 
 Pascal = Newton / Meter ** 2
 Pascal.set_symbol('Pa')
+psi = Unit.from_unit(Pascal, 'psi', 6894.76)
 
 Joule = Newton * Meter
 Joule.set_symbol('J')

@@ -9,8 +9,6 @@ boundary_faces = namedtuple('boundaries', 'center vector owner patch')
 internal_faces = namedtuple('internal', 'center vector owner neighbour')
 info = namedtuple('info', 'cells unit')
 
-patch = namedtuple('patch', 'name type values')
-
 
 def on_demand_prop(fn):
     """Decorator that makes a property lazy-evaluated.

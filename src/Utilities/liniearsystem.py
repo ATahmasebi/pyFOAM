@@ -40,9 +40,19 @@ class LinearSystem:
 
     def solve(self):
         self.assemble_matrix()
-        sol = spsolve(self.lhs, self.rhs)
+        oldshape = self.rhs.shape
+        _, dim, _ = oldshape
+        newshape = (-1,) if dim == 1 else (-1, dim)
+        sol = spsolve(self.lhs, self.rhs.reshape(newshape))
         unit = self.rhs.unit / self.data[0].unit
-        return Field(sol, unit)
+        return Field(sol, unit).reshape(oldshape)
+
+    def clear(self):
+        self.rows.clear()
+        self.columns.clear()
+        self.data.clear()
+        self.rhs = None
+        self.lhs = None
 
 
 if __name__ == "__main__":
