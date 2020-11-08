@@ -16,12 +16,13 @@ class Mesh:
         self._phi_b = None
         self.patchlist = []
         # maybe: start range from -1 to include empty bounries
-        for p in range(np.max(self.topology.boundary.patch) + 1):
+        for p in range(-1, np.max(self.topology.boundary.patch) + 1):
             index = self.topology.boundary.patch == p
             ow = self.topology.boundary.owner[index]
             fc = self.topology.boundary.center[index]
             fv = self.topology.boundary.vector[index]
             self.patchlist.append(boundary_faces(fc, fv, ow, p))
+        self.set_BC(-1, lambda patch, mesh: mesh.phi[patch.owner], [self])
 
     # Maybe: pass kwargs to func
     def set_BC(self, patch, func, args):

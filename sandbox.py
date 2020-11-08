@@ -3,19 +3,28 @@ from src.Utilities.field import Field
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 from time import perf_counter
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+fig = plt.figure(figsize=(6, 4))
+ax = fig.gca()
+
+y = np.random.random(50) * 10
+x = np.random.random(50) * 10
+# t = np.linspace(0, 1, 100)
+levels = np.linspace(0, 300, 20)
 
 
+def init():
+    ax.set_xlim(-1, 11)
+    ax.set_ylim(-1, 11)
 
-data = np.random.random(10).reshape((-1,1,1))
 
-row = np.random.randint(0, 9, 10)
-col = np.random.randint(0, 9, 10)
+def update(frame):
+    z = x ** 2 + y ** 2 * frame / 50
+    cntr = ax.tricontourf(x, y, z, levels=levels, cmap="YlOrRd")
+    return cntr
 
-m = sparse.csc_matrix((data, (row, col)), shape=(10,10))
-m.setdiag(m.diagonal() + 1)
 
-b = np.random.random(20).reshape((-1,2))
-
-x = spsolve(m, b)
-print(m.toarray() @ x - b)
-print()
+ani = FuncAnimation(fig, update, frames=99, init_func=init, interval=100)
+plt.show()

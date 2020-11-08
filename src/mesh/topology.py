@@ -25,14 +25,6 @@ class Topology(object):
         self.internal = internal_faces(fc[f_index], fv[f_index], owner, neighbour)
         f_index, owner, p = np.array(elements['boundaries'], dtype=int).transpose()
         self.boundary = boundary_faces(fc[f_index], fv[f_index], owner, p)
-        # self.boundary = []
-        # for p in range(np.max(boundaries.patch) + 1):
-        #     index = boundaries.patch == p
-        #     ow = boundaries.owner[index]
-        #     fc = boundaries.center[index]
-        #     fv = boundaries.vector[index]
-        #     self.boundary.append(boundary_faces(fc, fv, ow, p))
-
         pvi = dot(self.internal.center, self.internal.vector) / 3
         cv = Field(np.zeros(self.info.cells), pvi.unit).reshape(scaler)
         np.add.at(cv, self.internal.owner, pvi)
