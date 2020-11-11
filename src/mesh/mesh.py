@@ -35,7 +35,7 @@ class Mesh:
             return phi0
         elif phi0.size in [1, 3]:
             _phi = Field(np.empty((cells, phi0.size, 1)), phi0.unit)
-            _phi[:] = phi0
+            _phi[:] = phi0.reshape((1, phi0.size, 1))
             return _phi
         else:
             raise ValueError('Failed to initialize phi0')

@@ -55,7 +55,7 @@ def laplacian(gamma: Field, mesh: Mesh, correction='or'):
 
 
 if __name__ == '__main__':
-    path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\heat.mphtxt'
+    path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test3.mphtxt'
     # path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
     from src.conversion.convert import connectivity_to_foam
