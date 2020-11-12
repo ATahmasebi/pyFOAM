@@ -55,7 +55,7 @@ def laplacian(gamma: Field, mesh: Mesh, correction='or'):
 
 
 if __name__ == '__main__':
-    path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\test3.mphtxt'
+    path = 'D:\\Documents\\Code\\pyFOAM\\src\\test\\heat.mphtxt'
     # path = 'D:\\Documents\\VScode\\Python\\pyFOAM\\src\\conversion\\line.mphtxt'
     from src.conversion.comsol import read_comsol_file, build_element_connectivity
     from src.conversion.convert import connectivity_to_foam
@@ -118,11 +118,14 @@ if __name__ == '__main__':
 
     plt.show()
 
+    pch = me.topology.boundary.patch == 3
+    y2 = me.topology.boundary.center[pch, 1, 0]
     fig2 = plt.figure()
     ax2 = fig2.gca()
-    data = sorted(zip(y, me.phi.reshape((-1,))), key=lambda d: d[0])
+    ax2.set_xlim(0, 0.1)
+    ax2.set_ylim(299, 311)
+    data = sorted(zip(y2, me.phi[me.topology.boundary.owner[pch]].reshape((-1,))), key=lambda d: d[0])
     xx = [d[0] for d in data]
     tt = [d[1] for d in data]
-
     ax2.plot(xx, tt)
     plt.show()
