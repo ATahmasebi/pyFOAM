@@ -25,7 +25,7 @@ class Mesh:
         self.set_BC(-1, lambda patch, mesh: mesh.phi[patch.owner], [self])
 
     # Maybe: pass kwargs to func
-    def set_BC(self, patch, func, args):
+    def set_BC(self, patch, func, args=[]):
         index = self.topology.boundary.patch == patch
         self.BC[patch] = (index, func, args)
 
