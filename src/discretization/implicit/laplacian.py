@@ -1,7 +1,7 @@
 import numpy as np
 from src.mesh.mesh import Mesh
 from src.Utilities.field import Field, dot
-from src.Utilities.primitives import BaseTerm, on_demand_prop
+from src.Utilities.primitives import BaseTerm
 
 
 class Laplacian(BaseTerm):
@@ -42,8 +42,9 @@ class Laplacian(BaseTerm):
             raise ValueError('invalid orthogonal correction method.')
         return Ef, Tf
 
-    @on_demand_prop
+    @property
     def LHS(self):
+        self._clear()
         gamma_f = self.gamma_f
         dCF = self.mesh.topology.dCF
 
@@ -51,13 +52,13 @@ class Laplacian(BaseTerm):
         naf = -af
         owner = self.mesh.topology.internal.owner
         neighbour = self.mesh.topology.internal.neighbour
-        self.lhs_add(owner, owner, af)
-        self.lhs_add(neighbour, neighbour, af)
-        self.lhs_add(owner, neighbour, naf)
-        self.lhs_add(neighbour, owner, naf)
+        self.lhs_add(owner, owner, naf)
+        self.lhs_add(neighbour, neighbour, naf)
+        self.lhs_add(owner, neighbour, af)
+        self.lhs_add(neighbour, owner, af)
 
         Sb = self.mesh.topology.boundary.vector
-        ndCb = self.mesh.topology.ndCb
+        ndCb = -self.mesh.topology.ndCb
         abf = self.gamma_bf * Sb.norm / ndCb
         ownerb = self.mesh.topology.boundary.owner
         self.lhs_add(ownerb, ownerb, abf.reshape((-1,)))
@@ -65,7 +66,7 @@ class Laplacian(BaseTerm):
 
     @property
     def RHS(self):
-        return self.get_rhs()
+        return self.__rhs
 
     def update(self):
         Sb = self.mesh.topology.boundary.vector
@@ -75,7 +76,7 @@ class Laplacian(BaseTerm):
         abf_phib = phi_b * self.gamma_bf * Sb.norm / ndCb
         _, dim, _ = abf_phib.shape
         rhs = Field(np.zeros(shape=(self.mesh.topology.info.cells, dim, 1)), abf_phib.unit)
-        np.add.at(rhs, ownerb, abf_phib)
+        np.subtract.at(rhs, ownerb, abf_phib)
 
         # correction:
         if self.correction in ['or', 'oc', 'mc']:
@@ -84,7 +85,7 @@ class Laplacian(BaseTerm):
             neighbour = self.mesh.topology.internal.neighbour
             owner = self.mesh.topology.internal.owner
             ac = self.gamma_f * (grad_f @ self.Tf)
-            np.add.at(rhs, owner, ac)
-            np.subtract.at(rhs, neighbour, ac)
+            np.add.at(rhs, neighbour, ac)
+            np.subtract.at(rhs, owner, ac)
 
-        self.rhs_add(rhs)
+        self.__rhs = rhs

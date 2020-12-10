@@ -1,7 +1,6 @@
 import numpy as np
 
 from src.Utilities.primitives import boundary_faces
-from src.Utilities.liniearsystem import LinearSystem
 from src.discretization.explicit.grad import least_sqr as grad
 from src.Utilities.field import Field, on_demand_prop
 
@@ -9,13 +8,11 @@ from src.Utilities.field import Field, on_demand_prop
 class Mesh:
     def __init__(self, topology, phi0):
         self.topology = topology
-        self.LS = LinearSystem(self.topology.info.cells)
         self.BC = {}
         self._phi = self._set_initial_value(phi0)
         self._grad = None
         self._phi_b = None
         self.patchlist = []
-        # maybe: start range from -1 to include empty bounries
         for p in range(-1, np.max(self.topology.boundary.patch) + 1):
             index = self.topology.boundary.patch == p
             ow = self.topology.boundary.owner[index]

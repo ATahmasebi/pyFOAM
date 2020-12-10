@@ -20,6 +20,7 @@ class Ddt(BaseTerm):
 
     @property
     def LHS(self):
+        self._clear()
         if self.scheme == 'EU':
             ac = self.rho / self.delta * self.mesh.topology.cells.volume
         elif self.scheme == 'SOUE':
@@ -44,5 +45,4 @@ class Ddt(BaseTerm):
                 rhs = self.rho / (2 * self.delta) * self.mesh.topology.cells.volume * (4 * self.phi0 - self.phi00)
         else:
             raise ValueError('Unkown scheme!')
-        self.rhs_add(rhs)
-        return self.get_rhs()
+        return rhs

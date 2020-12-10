@@ -14,6 +14,7 @@ class Divergence(BaseTerm):
         self.scheme = scheme
 
     def update(self):
+        self._clear()
         vf = self.Vmesh.topology.face_interpolate(self.Vmesh.phi)
         flux_f = self.rho * dot(vf, self.mesh.topology.internal.vector).reshape((-1,))
         index, corr = face_interpolation(self.mesh, flux_f, scheme=self.scheme)
@@ -26,7 +27,7 @@ class Divergence(BaseTerm):
         rhs = Field(np.zeros(shape=(self.mesh.topology.info.cells, dim, 1)), flux_bf.unit)
         np.add.at(rhs, owner, corr * flux_f.reshape((-1, 1, 1)))
         np.subtract.at(rhs, self.mesh.topology.boundary.owner, flux_bf)
-        self.rhs_add(rhs)
+        self.__rhs = rhs
 
     @property
     def LHS(self):
@@ -34,4 +35,4 @@ class Divergence(BaseTerm):
 
     @property
     def RHS(self):
-        return self.get_rhs()
+        return self.__rhs

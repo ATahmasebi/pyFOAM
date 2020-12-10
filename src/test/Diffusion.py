@@ -43,14 +43,15 @@ ddt = Ddt(me, rho, dt, 'SOUE')
 N = 100
 phi_list = []
 
+cyc = 20
 for i in range(N):
     ddt.update()
     ddtlhs = ddt.LHS
     ddtrhs = ddt.RHS
-    for j in range(20):
+    for j in range(cyc):
         lap.update()
-        lhs = lap.LHS + ddtlhs
-        rhs = lap.RHS + ddtrhs
+        lhs = ddtlhs - lap.LHS
+        rhs = ddtrhs - lap.RHS
         phi = spsolve(lhs, rhs.reshape((-1,)))
         me.phi = Field(phi, rhs.unit / lap.lhs_unit).reshape((-1, 1, 1))
     phi_list.append(me.phi)
